@@ -25,12 +25,11 @@ def gammaCorrection(img):
     return img_gamma_corrected
 
 print("fuck")
-#filepath = "C:/Users/aol/Downloads/284726492_1067947430484623_4755717909050278760_n.png"
-#filepath = "C:/Users/aol/Downloads/313888430_676020084051290_6385229983960281955_n.jpg"
-#filepath ="C:/Users/aol/Downloads/315455089_827896401877279_2855901142268397829_n.jpg"
-#filepath ="C:/Users/aol/OneDrive - Novicell APS/Pictures/315519545_3340712862818449_5419462414207795362_n.jpg"
-filepath ="C:/Users/aol/Downloads/315519545_3340712862818449_5419462414207795362_n.jpg" 
-
+#filepath = "./pictures/284726492_1067947430484623_4755717909050278760_n.png"
+#filepath = "./pictures/313888430_676020084051290_6385229983960281955_n.jpg"
+#filepath ="./pictures/315455089_827896401877279_2855901142268397829_n.jpg"
+#filepath ="./pictures/315519545_3340712862818449_5419462414207795362_n.jpg"
+filepath ="./pictures/315519545_3340712862818449_5419462414207795362_n.jpg" 
 loadedImage = cv2.imread(filepath)
 
 
