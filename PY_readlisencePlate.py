@@ -1,8 +1,25 @@
-from email.mime import image
+
 import cv2
-import pytesseract
 from easyocr import Reader
-import numpy as np
+import re
+
+def Regex(txt):
+    x = re.sub( "\W", "", txt)
+    return x
+def ResizeWithAspectRatio(image, width=None, height=None, inter=cv2.INTER_AREA):
+    dim = None
+    (h, w) = image.shape[:2]
+
+    if width is None and height is None:
+        return image
+    if width is None:
+        r = height / float(h)
+        dim = (int(w * r), height)
+    else:
+        r = width / float(w)
+        dim = (width, int(h * r))
+
+    return cv2.resize(image, dim, interpolation=inter)
 def crop_img(img, scale=1.0):
     center_x, center_y = img.shape[1] / 2, img.shape[0] / 2
     width_scaled, height_scaled = img.shape[1] * scale, img.shape[0] * scale
@@ -11,63 +28,66 @@ def crop_img(img, scale=1.0):
     img_cropped = img[int(top_y):int(bottom_y), int(left_x):int(right_x)]
     return img_cropped
 
-
-def gammaCorrection(img):
-    ## [changing-contrast-brightness-gamma-correction]
-    lookUpTable = np.empty((1,256), np.uint8)
-    for i in range(256):
-        lookUpTable[0,i] = np.clip(pow(i / 255.0, gamma) * 255.0, 0, 255)
-
-    res = cv2.LUT(img, lookUpTable)
-    ## [changing-contrast-brightness-gamma-correction]
-
-    img_gamma_corrected = res#cv2.hconcat([img, res])
-    return img_gamma_corrected
-
 print("fuck")
 #filepath = "./pictures/284726492_1067947430484623_4755717909050278760_n.png"
 #filepath = "./pictures/313888430_676020084051290_6385229983960281955_n.jpg"
 #filepath ="./pictures/315455089_827896401877279_2855901142268397829_n.jpg"
 #filepath ="./pictures/315519545_3340712862818449_5419462414207795362_n.jpg"
-filepath ="./pictures/315519545_3340712862818449_5419462414207795362_n.jpg" 
+#filepath ="./pictures/315521287_544667254166335_5959194763568534518_n.jpg"
+filepath ="./pictures/315518199_814526446486979_6015829447265578044_n.jpg"
 loadedImage = cv2.imread(filepath)
-
+originalImage = loadedImage
 
 alpha = 1.5 # Contrast control (1.0-3.0)
 beta = 40 # Brightness control (0-100)
 
 
-
+loadedImage = crop_img(loadedImage,0.53)
+loadedImage = ResizeWithAspectRatio(loadedImage, 300, 300)
+loadedImage = cv2.convertScaleAbs(loadedImage, alpha=alpha, beta=beta)
 blueImage = cv2.cvtColor(loadedImage,cv2.COLOR_RGB2BGR)
 backtoback = cv2.cvtColor(blueImage,cv2.COLOR_HSV2RGB)
 
 greyImg = cv2.cvtColor(backtoback,cv2.COLOR_BGR2GRAY)
-adjusted = cv2.convertScaleAbs(greyImg, alpha=alpha, beta=beta)
-blur = cv2.GaussianBlur(adjusted, (5,5), 0) 
-ret, Image = cv2.threshold(adjusted, 60 ,255,cv2.THRESH_BINARY) #29
 
-Image = crop_img(Image,0.53)
+blur = cv2.GaussianBlur(greyImg, (5,5), 0) 
+
+ret, Image = cv2.threshold(greyImg, 60 ,255,cv2.THRESH_BINARY) #29
+
+
 
 edged = cv2.Canny(blur, 30, 200) 
-cv2.imshow("testImage",Image)
+cv2.imshow("testImage",loadedImage)
 cv2.imshow("TestImage2",edged)
-cv2.imshow("TestImage3",blur)
 cv2.imshow("tester", greyImg)
 reader = Reader(['en'])
 # detect the text from the license plate
 detection = reader.readtext(edged)
+lisenceplate =""
 if len(detection)>0:
     for text in detection: 
-        if len(text[1].replace(" ", "")) ==7:
-            print(text[1])
-    
-    
+        plate = Regex(text[1].replace(" ", ""))
+        if len(plate) ==7:
+            lisenceplate = plate  
 detection = reader.readtext(Image)
 if len(detection)>0:
     for text in detection: 
-        if len(text[1].replace(" ", "")) ==7:
-            print(text[1])
-    
+        plate = Regex(text[1].replace(" ", ""))
+        if len(plate) ==7:
+           lisenceplate = plate  
+detection = reader.readtext(loadedImage)
+if len(detection)>0:
+    for text in detection: 
+        plate = Regex(text[1].replace(" ", ""))
+        if len(plate) ==7:
+            lisenceplate = plate
+detection = reader.readtext(originalImage)
+if len(detection)>0:
+    for text in detection: 
+        plate = Regex(text[1].replace(" ", ""))
+        if len(plate) ==7:
+            lisenceplate = plate
+if len(lisenceplate):
+    print(lisenceplate)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
-cv2.waitKey(1)
