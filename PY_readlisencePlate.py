@@ -28,11 +28,26 @@ def crop_img(img, scale=1.0):
     top_y, bottom_y = center_y - height_scaled / 2, center_y + height_scaled
     img_cropped = img[int(top_y):int(bottom_y), int(left_x):int(right_x)]
     return img_cropped
-
+def checkifLisencePlate(string):
+    if not string[0].isalpha() :
+        return False
+    if not string[1].isalpha() :
+        return False
+    if not string[2].isnumeric():
+        return False
+    if not string[3].isnumeric():
+        return False
+    if not string[4].isnumeric():
+        return False
+    if not string[5].isnumeric():
+        return False
+    if not string[6].isnumeric():
+        return False
+    return True
 print("fuck")
 #filepath = "./pictures/284726492_1067947430484623_4755717909050278760_n.png"
 #filepath = "./pictures/313888430_676020084051290_6385229983960281955_n.jpg"
-#filepath ="./pictures/315455089_827896401877279_2855901142268397829_n.jpg"
+filepath ="./pictures/315455089_827896401877279_2855901142268397829_n.jpg"
 #filepath ="./pictures/315519545_3340712862818449_5419462414207795362_n.jpg"
 #filepath ="./pictures/315521287_544667254166335_5959194763568534518_n.jpg"
 #filepath ="./pictures/315518199_814526446486979_6015829447265578044_n.jpg"
@@ -46,21 +61,16 @@ alpha = 1.5 # Contrast control (1.0-3.0)
 beta = 40 # Brightness control (0-100)
 
 
-loadedImage = crop_img(loadedImage,0.53)
-loadedImage = ResizeWithAspectRatio(loadedImage, 300, 300)
-loadedImage = cv2.convertScaleAbs(loadedImage, alpha=alpha, beta=beta)
+loadedImage = cv2.convertScaleAbs(ResizeWithAspectRatio(crop_img(loadedImage,0.53), 300, 300), alpha=alpha, beta=beta)
+
 blueImage = cv2.cvtColor(loadedImage,cv2.COLOR_RGB2BGR)
 backtoback = cv2.cvtColor(blueImage,cv2.COLOR_HSV2RGB)
-
 greyImg = cv2.cvtColor(backtoback,cv2.COLOR_BGR2GRAY)
 
 blur = cv2.GaussianBlur(greyImg, (5,5), 0) 
-
 ret, Image = cv2.threshold(greyImg, 60 ,255,cv2.THRESH_BINARY) #29
-
-
-
 edged = cv2.Canny(blur, 30, 200) 
+
 cv2.imshow("testImage",loadedImage)
 cv2.imshow("TestImage2",edged)
 cv2.imshow("tester", greyImg)
@@ -71,25 +81,25 @@ lisenceplate =""
 if len(detection)>0:
     for text in detection: 
         plate = Regex(text[1].replace(" ", ""))
-        if len(plate) ==7:
+        if len(plate) ==7 and checkifLisencePlate(plate):
             lisenceplate = plate  
 detection = reader.readtext(Image)
 if len(detection)>0:
     for text in detection: 
         plate = Regex(text[1].replace(" ", ""))
-        if len(plate) ==7:
+        if len(plate) ==7 and checkifLisencePlate(plate):
            lisenceplate = plate  
 detection = reader.readtext(loadedImage)
 if len(detection)>0:
     for text in detection: 
         plate = Regex(text[1].replace(" ", ""))
-        if len(plate) ==7:
+        if len(plate) ==7 and checkifLisencePlate(plate):
             lisenceplate = plate
 detection = reader.readtext(originalImage)
 if len(detection)>0:
     for text in detection: 
         plate = Regex(text[1].replace(" ", ""))
-        if len(plate) ==7:
+        if len(plate) ==7 and checkifLisencePlate(plate):
             lisenceplate = plate
 if len(lisenceplate):
     print(lisenceplate)
