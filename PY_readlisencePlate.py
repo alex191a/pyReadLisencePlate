@@ -2,6 +2,7 @@
 import cv2
 from easyocr import Reader
 import re
+from cam import Webcam
 
 def Regex(txt):
     x = re.sub( "\W", "", txt)
@@ -34,8 +35,11 @@ print("fuck")
 #filepath ="./pictures/315455089_827896401877279_2855901142268397829_n.jpg"
 #filepath ="./pictures/315519545_3340712862818449_5419462414207795362_n.jpg"
 #filepath ="./pictures/315521287_544667254166335_5959194763568534518_n.jpg"
-filepath ="./pictures/315518199_814526446486979_6015829447265578044_n.jpg"
-loadedImage = cv2.imread(filepath)
+#filepath ="./pictures/315518199_814526446486979_6015829447265578044_n.jpg"
+#loadedImage = cv2.imread(filepath)
+
+loadedImage = Webcam()
+
 originalImage = loadedImage
 
 alpha = 1.5 # Contrast control (1.0-3.0)
