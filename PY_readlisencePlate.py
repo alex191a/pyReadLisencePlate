@@ -8,6 +8,9 @@ from PIL import ImageTk,Image as PILImage, ImageOps
 # Tkinter for GUI
 from tkinter import *
 
+# Global variable for cam
+cam = cv2.VideoCapture(0)
+
 # Variable for license plate text
 lisenceplate = ""
 class Window(Frame):
@@ -37,22 +40,49 @@ root.geometry("800x600")
 # set window background color
 root.configure(bg='lightgray')
 
-# Create a Label to capture the Video frames
-label =Label(app)
-label.grid(row=0, column=0)
-cap = cv2.VideoCapture(0)
+def show_camera():
+
+	# Create a Label to capture the Video frames
+	label = Label(app)
+	label.grid(row=0, column=0)
+	label.place(x=400,y=300, anchor="center")
+	
+	# Check if cam is open
+	if cam.isOpened() == 0:
+		# Open cam
+		cam.open()
+
+	# Create label
+	root.LiveCam = label
+
+	# Show frames
+	show_frames()
+
+def restart_app():
+	# Destroy previously captured image
+	app.imgPanel.destroy()
+	show_camera()
+
+def kill_camera():
+	cam.release
+	root.LiveCam.destroy()
 
 # Define function to show frame
 def show_frames():
-   # Get the latest frame and convert into Image
-   cv2image= cv2.cvtColor(cap.read()[1],cv2.COLOR_BGR2RGB)
-   img = PILImage.fromarray(cv2image)
-   # Convert image to PhotoImage
-   imgtk = ImageTk.PhotoImage(image = img)
-   label.imgtk = imgtk
-   label.configure(image=imgtk)
-   # Repeat after an interval to capture continiously
-   label.after(20, show_frames)
+	if (root.LiveCam.winfo_exists() == 0):
+		cam.release
+		root.LiveCam.destroy()
+		return
+	# Get the latest frame and convert into Image
+	cv2image = cv2.cvtColor(cam.read()[1],cv2.COLOR_BGR2RGB)
+	img = PILImage.fromarray(cv2image).resize((300, 200))
+	# Convert image to PhotoImage
+	imgtk = ImageTk.PhotoImage(image = img)
+	root.LiveCam.imgtk = imgtk
+	root.LiveCam.configure(image=imgtk)
+
+	# Repeat after an interval to capture continiously
+	root.LiveCam.after(20, show_frames)
 
 # Function for reading license plate
 def readLicensePlate(self):
@@ -72,8 +102,12 @@ def readLicensePlate(self):
 
 	# Load image form filepath
 	#loadedImage = cv2.imread(filepath)
-	loadedImage = Webcam()
+	loadedImage = Webcam(cam)
 	originalImage = loadedImage
+
+	# Kill live camera
+	cam.release
+	root.LiveCam.destroy()
 
 	# Show image
 	#self.canvas = Canvas(root, width = 300, height = 300)
@@ -159,11 +193,20 @@ def readLicensePlate(self):
 				lisenceplate = plate
 
 	# Print license plate if found
-	if len(lisenceplate):
-		self.licenseText.config(text=lisenceplate)
-		print(lisenceplate)
+	if lisenceplate != "":
+		if len(lisenceplate):
+			self.licenseText.config(text=lisenceplate)
+			print(lisenceplate)
+		else:
+			self.licenseText.config(text="Ingen nummerplade fundet")
+			print("Ingen nummerplade fundet")
 	else:
 		self.licenseText.config(text="Ingen nummerplade fundet")
+		print("Ingen nummerplade fundet")
+
+	# Update start button to restart application
+	self.ReadLicensePlateButton.config(text="Restart", command=lambda:restart_app())
+	self.ReadLicensePlateButton.update()
 
 # Regex
 def Regex(txt):
@@ -209,6 +252,6 @@ def checkifLisencePlate(string):
 	return False
 
 # Show live preview
-show_frames()
+show_camera()
 # Main function
 root.mainloop()
