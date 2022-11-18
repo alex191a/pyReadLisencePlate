@@ -42,21 +42,16 @@ alpha = 1.5 # Contrast control (1.0-3.0)
 beta = 40 # Brightness control (0-100)
 
 
-loadedImage = crop_img(loadedImage,0.53)
-loadedImage = ResizeWithAspectRatio(loadedImage, 300, 300)
-loadedImage = cv2.convertScaleAbs(loadedImage, alpha=alpha, beta=beta)
+loadedImage = cv2.convertScaleAbs(ResizeWithAspectRatio(crop_img(loadedImage,0.53), 300, 300), alpha=alpha, beta=beta)
+
 blueImage = cv2.cvtColor(loadedImage,cv2.COLOR_RGB2BGR)
 backtoback = cv2.cvtColor(blueImage,cv2.COLOR_HSV2RGB)
-
 greyImg = cv2.cvtColor(backtoback,cv2.COLOR_BGR2GRAY)
 
 blur = cv2.GaussianBlur(greyImg, (5,5), 0) 
-
 ret, Image = cv2.threshold(greyImg, 60 ,255,cv2.THRESH_BINARY) #29
-
-
-
 edged = cv2.Canny(blur, 30, 200) 
+
 cv2.imshow("testImage",loadedImage)
 cv2.imshow("TestImage2",edged)
 cv2.imshow("tester", greyImg)
