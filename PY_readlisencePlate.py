@@ -1,6 +1,7 @@
 # Imports
 import cv2
 from easyocr import Reader
+import easyocr
 import re
 from cam import Webcam
 from PIL import ImageTk,Image as PILImage, ImageOps
