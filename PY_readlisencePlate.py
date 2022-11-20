@@ -13,34 +13,73 @@ cam = cv2.VideoCapture(0)
 
 # Variable for license plate text
 lisenceplate = ""
-class Window(Frame):
+
+# Window to select image or live camera
+class MainWindow(Frame):
 	def __init__(self, master=None):
 		Frame.__init__(self, master)
 		self.master = master
 		self.pack(fill=BOTH, expand=1)
+		self.configure(background='white', width=500, height=500)
+
+		# Label with images
+		img1 = Label(self, text="Image 1")
+		img2 = Label(self, text="Image 2")
+		img3 = Label(self, text="Image 3")
+		img4 = Label(self, text="Image 4")
+		img5 = Label(self, text="Image 5")
+		img6 = Label(self, text="Image 6")
+
+		# Align with grid
+		img1.grid(row=0, column=0)
+		img2.grid(row=1, column=0)
+		img3.grid(row=2, column=0)
+		img4.grid(row=0, column=1)
+		img5.grid(row=1, column=1)
+		img6.grid(row=2, column=1)
+
+
+		# Buttons to select live camera
+		cam1 = Button(self, text="Live cam")
+
+		# Align with grid
+		cam1.grid(row=1, column=3)
+
+
+class CameraWindow(Frame):
+	def __init__(self, master=None):
+		Frame.__init__(self, master)
+		self.master = master
+		self.pack(fill=BOTH, expand=1)
+		self.configure(background='white', width=800, height=600)
 
 		# Main label
-		self.Heading = Label(self, text="OpenCV nummerplade læser", font=("Helvetica", 22, "bold"))
-		self.Heading.place(x=400,y=20, anchor=CENTER)
+		Heading = Label(self, text="OpenCV nummerplade læser", font=("Helvetica", 22, "bold"))
+		Heading.place(x=400,y=20, anchor=CENTER)
 
 		# Button to read license plate
-		self.ReadLicensePlateButton = Button(self, text="Start", command=lambda:readLicensePlate(self))
-		self.ReadLicensePlateButton.place(x=400,y=130, anchor="center")
+		ReadLicensePlateButton = Button(self, text="Start", command=lambda:readLicensePlate(self))
+		ReadLicensePlateButton.place(x=400,y=130, anchor="center")
 
 		# License plate label
-		self.licenseText = Label(self, text="...", font=("Helvetica", 16, "bold"))
-		self.licenseText.place(x=400,y=160, anchor="center")
+		licenseText = Label(self, text="...", font=("Helvetica", 16, "bold"))
+		licenseText.place(x=400,y=160, anchor="center")
 
+		show_camera(self)
 
 # Create GUI
 root = Tk()
-app = Window(root)
-root.wm_title("Read license plate")
-root.geometry("800x600")
+
+app = MainWindow(root)
+root.wm_title("Læs nummerplade med OpenCV")
+# root.geometry("800x600")
 # set window background color
 root.configure(bg='lightgray')
 
-def show_camera():
+def show_camera(self):
+
+	# Button to read license plate
+	self.ReadLicensePlateButton.configure(text="Start", command=lambda:readLicensePlate(self))
 
 	# Create a Label to capture the Video frames
 	label = Label(app)
@@ -56,36 +95,39 @@ def show_camera():
 	root.LiveCam = label
 
 	# Show frames
-	show_frames()
+	show_frames(self)
 
-def restart_app():
+def restart_app(self):
 	# Destroy previously captured image
 	app.imgPanel.destroy()
-	show_camera()
+	show_camera(self)
 
-def kill_camera():
+def kill_camera(self):
 	cam.release
 	root.LiveCam.destroy()
 
 # Define function to show frame
-def show_frames():
-	if (root.LiveCam.winfo_exists() == 0):
+def show_frames(self):
+	if (self.LiveCam.winfo_exists() == 0):
 		cam.release
-		root.LiveCam.destroy()
+		self.LiveCam.destroy()
 		return
 	# Get the latest frame and convert into Image
 	cv2image = cv2.cvtColor(cam.read()[1],cv2.COLOR_BGR2RGB)
 	img = PILImage.fromarray(cv2image).resize((300, 200))
 	# Convert image to PhotoImage
 	imgtk = ImageTk.PhotoImage(image = img)
-	root.LiveCam.imgtk = imgtk
-	root.LiveCam.configure(image=imgtk)
+	self.LiveCam.imgtk = imgtk
+	self.LiveCam.configure(image=imgtk)
 
 	# Repeat after an interval to capture continiously
-	root.LiveCam.after(20, show_frames)
+	self.LiveCam.after(20, show_frames, self)
 
 # Function for reading license plate
 def readLicensePlate(self):
+
+	# Disallow button
+	self.ReadLicensePlateButton.configure(text="Vent...", state=DISABLED)
 
 	# Update status
 	self.licenseText.config(text="Læser nummerplade...")
@@ -107,7 +149,7 @@ def readLicensePlate(self):
 
 	# Kill live camera
 	cam.release
-	root.LiveCam.destroy()
+	self.LiveCam.destroy()
 
 	# Show image
 	#self.canvas = Canvas(root, width = 300, height = 300)
@@ -205,7 +247,7 @@ def readLicensePlate(self):
 		print("Ingen nummerplade fundet")
 
 	# Update start button to restart application
-	self.ReadLicensePlateButton.config(text="Restart", command=lambda:restart_app())
+	self.ReadLicensePlateButton.config(text="Genstart", command=lambda:restart_app(), state=NORMAL)
 	self.ReadLicensePlateButton.update()
 
 # Regex
@@ -252,6 +294,6 @@ def checkifLisencePlate(string):
 	return False
 
 # Show live preview
-show_camera()
+# show_camera(self)
 # Main function
 root.mainloop()
