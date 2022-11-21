@@ -13,7 +13,6 @@ from tkinter import *
 cam = cv2.VideoCapture(0)
 
 # Variable for license plate text
-lisenceplate = ""
 class Window(Frame):
 	def __init__(self, master=None):
 		Frame.__init__(self, master)
@@ -87,6 +86,7 @@ def show_frames():
 
 # Function for reading license plate
 def readLicensePlate(self):
+	lisenceplate= ""
 
 	# Update status
 	self.licenseText.config(text="Læser nummerplade...")
@@ -159,7 +159,7 @@ def readLicensePlate(self):
 
 	# Initialize reader
 	reader = Reader(['en'])
-
+	
 	# loop over edged image for detection
 	# detect the text from the license plate
 	detection = reader.readtext(edged)
