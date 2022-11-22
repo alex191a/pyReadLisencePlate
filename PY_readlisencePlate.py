@@ -4,6 +4,7 @@ from easyocr import Reader
 import easyocr
 import re
 from cam import Webcam
+from request import IsPolice
 from PIL import ImageTk,Image as PILImage, ImageOps
 
 # Tkinter for GUI
@@ -30,6 +31,10 @@ class Window(Frame):
 		# License plate label
 		self.licenseText = Label(self, text="...", font=("Helvetica", 16, "bold"))
 		self.licenseText.place(x=400,y=160, anchor="center")
+
+        # Is police label
+		self.isPolice = Label(self, text="...", font=("Helvetica", 16, "bold"))
+		self.isPolice.place(x=400,y=180, anchor="center")
 
 
 # Create GUI
@@ -90,6 +95,7 @@ def readLicensePlate(self):
 
 	# Update status
 	self.licenseText.config(text="Læser nummerplade...")
+	self.isPolice.config(text="Tjekker politi...")
 	self.update()
 
 	# Read image
@@ -198,12 +204,20 @@ def readLicensePlate(self):
 		if len(lisenceplate):
 			self.licenseText.config(text=lisenceplate)
 			print(lisenceplate)
+			if IsPolice(lisenceplate):
+				print("is police")
+				self.isPolice.config(text="Politi")
+			else:
+				print("is not police")
+				self.isPolice.config(text="Ikke politi")
 		else:
 			self.licenseText.config(text="Ingen nummerplade fundet")
 			print("Ingen nummerplade fundet")
 	else:
 		self.licenseText.config(text="Ingen nummerplade fundet")
 		print("Ingen nummerplade fundet")
+
+
 
 	# Update start button to restart application
 	self.ReadLicensePlateButton.config(text="Restart", command=lambda:restart_app())
