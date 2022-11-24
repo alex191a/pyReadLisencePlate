@@ -8,42 +8,45 @@ from lib import api
 from PIL import ImageTk,Image as PILImage, ImageOps
 
 # Tkinter for GUI
-from tkinter import *
+# from tkinter import *
+
+import customtkinter as tk
 
 # Global variable for cam
 cam = cv2.VideoCapture(0)
 
 # Variable for license plate text
-class Window(Frame):
+class Window(tk.CTkFrame):
 	def __init__(self, master=None):
-		Frame.__init__(self, master)
+		tk.CTkFrame.__init__(self, master)
 		self.master = master
-		self.pack(fill=BOTH, expand=1)
+		self.pack(fill=tk.BOTH, expand=1)
 		self.configure(background='white', width=800, height=600)
 
 		# Main label
-		self.Heading = Label(self, text="OpenCV nummerplade læser", font=("Helvetica", 22, "bold"))
-		self.Heading.place(x=400,y=20, anchor=CENTER)
+		self.Heading = tk.CTkLabel(self, text="OpenCV nummerplade læser", text_font=("Helvetica", 22, "bold"))
+		self.Heading.place(relx=0.5,y=25, anchor=tk.CENTER)
 
 		# Button to read license plate
-		self.ReadLicensePlateButton = Button(self, text="Start", command=lambda:readLicensePlate(self))
-		self.ReadLicensePlateButton.place(x=400,y=130, anchor="center")
+		self.ReadLicensePlateButton = tk.CTkButton(self, text="Start", command=lambda:readLicensePlate(self))
+		self.ReadLicensePlateButton.place(relx=0.5,y=130, anchor="center")
 
 		# License plate label
-		self.licenseText = Label(self, text="...", font=("Helvetica", 16, "bold"))
-		self.licenseText.place(x=400,y=160, anchor="center")
+		self.licenseText = tk.CTkLabel(self, text="...", text_font=("Helvetica", 16, "bold"))
+		self.licenseText.place(relx=0.5,y=160, anchor="center")
 
         # Is police label
-		self.isPolice = Label(self, text="...", font=("Helvetica", 16, "bold"))
-		self.isPolice.place(x=400,y=180, anchor="center")
+		self.isPolice = tk.CTkLabel(self, text="...", text_font=("Helvetica", 16, "bold"))
+		self.isPolice.place(relx=0.5,y=180, anchor="center")
 
 		# Label to show API status
-		self.apiStatus = Label(self, text="...", font=("Helvetica", 16, "bold"))
-		self.apiStatus.place(x=30,y=580, anchor="w")
+		self.apiStatus = tk.CTkLabel(self, text="...", text_font=("Helvetica", 16, "bold"))
+		self.apiStatus.place(x=30,rely=0.9, anchor="w")
 
 
 # Create GUI
-root = Tk()
+root = tk.CTk()
+root.resizable(False, False)
 
 app = Window(root)
 root.wm_title("Læs nummerplade med OpenCV")
@@ -64,12 +67,12 @@ def is_api_online():
 def show_camera():
 
 	# Define button
-	app.ReadLicensePlateButton.config(text="Start", command=lambda:readLicensePlate(app))
+	app.ReadLicensePlateButton.configure(text="Start", command=lambda:readLicensePlate(app))
 
 	# Create a Label to capture the Video frames
-	label = Label(app)
+	label = tk.CTkLabel(app)
 	label.grid(row=0, column=0)
-	label.place(x=400,y=300, anchor="center")
+	label.place(relx=0.5,y=300, anchor="center")
 	label.size = (300, 200)
 	
 	# Check if cam is open
@@ -87,8 +90,8 @@ def restart_app():
 	# Destroy previously captured image
 	app.imgPanel.destroy()
 	show_camera()
-	app.isPolice.config(text="...")
-	app.licenseText.config(text="...")
+	app.isPolice.configure(text="...")
+	app.licenseText.configure(text="...")
 
 def kill_camera():
 	cam.release()
@@ -115,8 +118,8 @@ def show_frames():
 def readLicensePlate(self):
 
 	# Update status
-	self.licenseText.config(text="Læser nummerplade...")
-	self.isPolice.config(text="Tjekker politi...")
+	self.licenseText.configure(text="Læser nummerplade...")
+	self.isPolice.configure(text="Tjekker politi...")
 	self.update()
 
 	# Read image
@@ -142,16 +145,16 @@ def readLicensePlate(self):
 	#self.canvas.pack()
 	#imgPIL = PILImage.open(filepath)
 	imgPIL = PILImage.fromarray(loadedImage)
-	imgPIL = ImageOps.fit(imgPIL, (600, 300), method = 0, bleed = 0.0, centering = (0.5, 0.5))
+	imgPIL = ImageOps.fit(imgPIL, (300, 200), method = 0, bleed = 0.0, centering = (0.5, 0.5))
 	img = ImageTk.PhotoImage(imgPIL)
 	#img.resize((100, 50), Image.ANTIALIAS)
 	#img.place(x=400,y=400, anchor="center")
 	#self.canvas.create_image(20, 20, anchor="center", image=img)
-	self.imgPanel = Label(app, image=img)
+	self.imgPanel = tk.CTkLabel(app, image=img)
 	self.imgPanel.image = img
 	#self.imgPanel.pack(side = "bottom", fill = "both", expand = "yes")
 	#self.imgPanel.place(x=400,y=400, anchor="center")
-	self.imgPanel.place(x=400,y=200, anchor=N)
+	self.imgPanel.place(relx=0.5,y=200, anchor=tk.N)
 	self.imgPanel.update()
 
 	# Crate variables for alpha and beta
@@ -226,7 +229,7 @@ def readLicensePlate(self):
 	# Print license plate if found
 	if lisenceplate != "":
 		if len(lisenceplate):
-			self.licenseText.config(text=lisenceplate)
+			self.licenseText.configure(text=lisenceplate)
 			print(lisenceplate)
 
 			# Update police check	
@@ -234,27 +237,27 @@ def readLicensePlate(self):
 				# Check if car is police owned
 				if isPoliceCheck["IsPolice"] == True:
 					print("is police")
-					self.isPolice.config(text="Politibil")
+					self.isPolice.configure(text="Politibil")
 				else:
 					print("is not police")
-					self.isPolice.config(text="Ikke politibil")
+					self.isPolice.configure(text="Ikke politibil")
 			# If error
 			else:
 				print("Error police check")
-				self.isPolice.config(text="Fejl: " + isPoliceCheck["status"])
+				self.isPolice.configure(text="Fejl: " + isPoliceCheck["status"])
 		else:
-			self.isPolice.config(text="...")
-			self.licenseText.config(text="Ingen nummerplade fundet")
+			self.isPolice.configure(text="...")
+			self.licenseText.configure(text="Ingen nummerplade fundet")
 			print("Ingen nummerplade fundet")
 	else:
-		self.isPolice.config(text="...")
-		self.licenseText.config(text="Ingen nummerplade fundet")
+		self.isPolice.configure(text="...")
+		self.licenseText.configure(text="Ingen nummerplade fundet")
 		print("Ingen nummerplade fundet")
 
 
 
 	# Update start button to restart application
-	self.ReadLicensePlateButton.config(text="Genstart", command=lambda:restart_app(), state=NORMAL)
+	self.ReadLicensePlateButton.configure(text="Genstart", command=lambda:restart_app(), state=tk.CTkNORMAL)
 	self.ReadLicensePlateButton.update()
 
 # Regex
