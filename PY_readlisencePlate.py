@@ -19,18 +19,19 @@ class Window(Frame):
 		Frame.__init__(self, master)
 		self.master = master
 		self.pack(fill=BOTH, expand=1)
+		self.configure(background='white', width=800, height=600)
 
 		# Main label
-		self.Heading = Label(self, text="OpenCV nummerplade læser", font=("Helvetica", 22, "bold"))
-		self.Heading.place(x=400,y=20, anchor=CENTER)
+		Heading = Label(self, text="OpenCV nummerplade læser", font=("Helvetica", 22, "bold"))
+		Heading.place(x=400,y=20, anchor=CENTER)
 
 		# Button to read license plate
-		self.ReadLicensePlateButton = Button(self, text="Start", command=lambda:readLicensePlate(self))
-		self.ReadLicensePlateButton.place(x=400,y=130, anchor="center")
+		ReadLicensePlateButton = Button(self, text="Start", command=lambda:readLicensePlate(self))
+		ReadLicensePlateButton.place(x=400,y=130, anchor="center")
 
 		# License plate label
-		self.licenseText = Label(self, text="...", font=("Helvetica", 16, "bold"))
-		self.licenseText.place(x=400,y=160, anchor="center")
+		licenseText = Label(self, text="...", font=("Helvetica", 16, "bold"))
+		licenseText.place(x=400,y=160, anchor="center")
 
         # Is police label
 		self.isPolice = Label(self, text="...", font=("Helvetica", 16, "bold"))
@@ -43,9 +44,10 @@ class Window(Frame):
 
 # Create GUI
 root = Tk()
-app = Window(root)
-root.wm_title("Read license plate")
-root.geometry("800x600")
+
+app = MainWindow(root)
+root.wm_title("Læs nummerplade med OpenCV")
+# root.geometry("800x600")
 # set window background color
 root.configure(bg='lightgray')
 
@@ -79,9 +81,9 @@ def show_camera():
 	app.LiveCam = label
 
 	# Show frames
-	show_frames()
+	show_frames(self)
 
-def restart_app():
+def restart_app(self):
 	# Destroy previously captured image
 	app.imgPanel.destroy()
 	show_camera()
@@ -111,7 +113,6 @@ def show_frames():
 
 # Function for reading license plate
 def readLicensePlate(self):
-	lisenceplate= ""
 
 	# Update status
 	self.licenseText.config(text="Læser nummerplade...")
@@ -253,7 +254,7 @@ def readLicensePlate(self):
 
 
 	# Update start button to restart application
-	self.ReadLicensePlateButton.config(text="Restart", command=lambda:restart_app())
+	self.ReadLicensePlateButton.config(text="Genstart", command=lambda:restart_app(), state=NORMAL)
 	self.ReadLicensePlateButton.update()
 
 # Regex
