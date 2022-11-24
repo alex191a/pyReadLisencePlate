@@ -1,4 +1,5 @@
 # Imports
+import copy
 import cv2
 from easyocr import Reader
 import easyocr
@@ -29,19 +30,19 @@ class Window(tk.CTkFrame):
 
 		# Button to read license plate
 		self.ReadLicensePlateButton = tk.CTkButton(self, text="Start", command=lambda:readLicensePlate(self))
-		self.ReadLicensePlateButton.place(relx=0.5,y=130, anchor="center")
+		self.ReadLicensePlateButton.place(relx=0.5,y=110, anchor="center")
 
 		# License plate label
-		self.licenseText = tk.CTkLabel(self, text="...", text_font=("Helvetica", 16, "bold"))
+		self.licenseText = tk.CTkLabel(self, text="...", text_font=("Helvetica", 12, "bold"))
 		self.licenseText.place(relx=0.5,y=160, anchor="center")
 
         # Is police label
-		self.isPolice = tk.CTkLabel(self, text="...", text_font=("Helvetica", 16, "bold"))
+		self.isPolice = tk.CTkLabel(self, text="...", text_font=("Helvetica", 12, "normal"))
 		self.isPolice.place(relx=0.5,y=180, anchor="center")
 
 		# Label to show API status
-		self.apiStatus = tk.CTkLabel(self, text="...", text_font=("Helvetica", 16, "bold"))
-		self.apiStatus.place(x=30,rely=0.9, anchor="w")
+		self.apiStatus = tk.CTkLabel(self, text="...", text_font=("Helvetica", 12, "normal"))
+		self.apiStatus.place(x=0, rely=0.95, anchor="w")
 
 
 # Create GUI
@@ -60,9 +61,9 @@ def is_api_online():
 
 	# Check if API is online
 	if apiCheck["success"] == True:
-		app.apiStatus.config(text="API online", fg="green")
+		app.apiStatus.configure(text="Online", fg="#778899")
 	else:
-		app.apiStatus.config(text="API offline - " + apiCheck["status"], fg="red")
+		app.apiStatus.configure(text="Offline - " + apiCheck["status"], fg="#f08080")
 
 def show_camera():
 
@@ -133,8 +134,8 @@ def readLicensePlate(self):
 
 	# Load image form filepath
 	#loadedImage = cv2.imread(filepath)
-	loadedImage = crop_img(WebCam.Webcam(cam),0.53)
-	originalImage = loadedImage
+	originalImage = crop_img(WebCam.Webcam(cam),0.53)
+	loadedImage = copy.copy(originalImage)
 
 	# Kill live camera
 	cam.release()
@@ -144,7 +145,7 @@ def readLicensePlate(self):
 	#self.canvas = Canvas(root, width = 300, height = 300)
 	#self.canvas.pack()
 	#imgPIL = PILImage.open(filepath)
-	imgPIL = PILImage.fromarray(loadedImage)
+	imgPIL = PILImage.fromarray(cv2.cvtColor(originalImage.copy(),cv2.COLOR_BGR2RGB))
 	imgPIL = ImageOps.fit(imgPIL, (300, 200), method = 0, bleed = 0.0, centering = (0.5, 0.5))
 	img = ImageTk.PhotoImage(imgPIL)
 	#img.resize((100, 50), Image.ANTIALIAS)
@@ -162,16 +163,19 @@ def readLicensePlate(self):
 	beta = 40 # Brightness control (0-100)
 
 	# Load image and reize
-	loadedImage = cv2.convertScaleAbs(ResizeWithAspectRatio(crop_img(loadedImage,0.53), 300, 300), alpha=alpha, beta=beta)
+	# loadedImage = cv2.convertScaleAbs(ResizeWithAspectRatio(crop_img(loadedImage,0.53), 300, 300), alpha=alpha, beta=beta)
+
+	# ResizedImage
+	resizedImage = cv2.convertScaleAbs(ResizeWithAspectRatio(loadedImage, 300, 300), alpha=alpha, beta=beta)
 
 	# Crate blue image
-	blueImage = cv2.cvtColor(loadedImage,cv2.COLOR_RGB2BGR)
+	blueImage = cv2.cvtColor(resizedImage, cv2.COLOR_RGB2BGR)
 
 	# Create backtoback image
-	backtoback = cv2.cvtColor(blueImage,cv2.COLOR_HSV2RGB)
+	backtoback = cv2.cvtColor(blueImage, cv2.COLOR_HSV2RGB)
 
 	# Create gray image
-	greyImg = cv2.cvtColor(backtoback,cv2.COLOR_BGR2GRAY)
+	greyImg = cv2.cvtColor(backtoback, cv2.COLOR_BGR2GRAY)
 
 	# Create blur
 	blur = cv2.GaussianBlur(greyImg, (5,5), 0) 
@@ -208,7 +212,7 @@ def readLicensePlate(self):
 				lisenceplate = plate
 
 	# Loop over
-	detection = reader.readtext(loadedImage)
+	detection = reader.readtext(resizedImage)
 	if len(detection)>0:
 		for text in detection: 
 			plate = Regex(text[1].replace(" ", ""))
@@ -223,37 +227,35 @@ def readLicensePlate(self):
 			if len(plate) ==7 and checkifLisencePlate(plate):
 				lisenceplate = plate
 
-	# Check if license plate is police
-	isPoliceCheck = api.IsPolice(lisenceplate)
 
-	# Print license plate if found
-	if lisenceplate != "":
+	# Check if lisence plate is a police car
+	if checkifLisencePlate(lisenceplate):
+
+		# Update license plate UI
 		if len(lisenceplate):
 			self.licenseText.configure(text=lisenceplate)
 			print(lisenceplate)
-
-			# Update police check	
-			if isPoliceCheck["success"] == True:
-				# Check if car is police owned
-				if isPoliceCheck["IsPolice"] == True:
-					print("is police")
-					self.isPolice.configure(text="Politibil")
-				else:
-					print("is not police")
-					self.isPolice.configure(text="Ikke politibil")
-			# If error
-			else:
-				print("Error police check")
-				self.isPolice.configure(text="Fejl: " + isPoliceCheck["status"])
 		else:
 			self.isPolice.configure(text="...")
 			self.licenseText.configure(text="Ingen nummerplade fundet")
 			print("Ingen nummerplade fundet")
-	else:
-		self.isPolice.configure(text="...")
-		self.licenseText.configure(text="Ingen nummerplade fundet")
-		print("Ingen nummerplade fundet")
 
+		# Check if license plate is police
+		isPoliceCheck = api.IsPolice(lisenceplate)
+
+		# Update police check	
+		if isPoliceCheck["success"] == True:
+			# Check if car is police owned
+			if isPoliceCheck["IsPolice"] == True:
+				print("is police")
+				self.isPolice.configure(text="Politibil")
+			else:
+				print("is not police")
+				self.isPolice.configure(text="Ikke politibil")
+		# If error
+		else:
+			print("Error police check")
+			self.isPolice.configure(text="Fejl: " + isPoliceCheck["status"])
 
 
 	# Update start button to restart application
