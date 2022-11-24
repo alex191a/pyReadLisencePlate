@@ -3,6 +3,59 @@ import requests
 
 from lib import config
 
+# check_api_status
+def check_api_status():
+	
+	# return object
+	returnObject = {
+		"success": False,
+		"status": ""
+	}
+
+	try:
+		# api-endpoint
+		URL_API = config.config["api"]["url"] + "/ping"
+
+		# sending get request and saving the response as response object
+		response = requests.get(url = URL_API, verify=False)
+		resp_dict = response.json()
+
+		# Check if success
+		# Check status code
+		if response.status_code != 200:
+			returnObject["success"] = False
+			return returnObject
+
+		# Update return object
+		returnObject["success"] = resp_dict.get('success') or False
+		returnObject["status"] = resp_dict.get('status') or ""
+
+		# Print insurance
+		# print(resp_dict['insurance']['selskab'])
+	except Exception as e:
+
+		# Print
+		print(str(e))
+
+		# Update return object
+		returnObject["success"] = False
+		returnObject["status"] = str(e)
+
+		return returnObject
+
+	except:
+
+		# Print error
+		print("Error in API call")
+
+		# Update return object
+		returnObject["success"] = False
+		returnObject["status"] = "Error in API call"
+
+		return returnObject
+
+	return returnObject
+
 def IsPolice(nummerplade):
 
 	# return object
@@ -14,7 +67,7 @@ def IsPolice(nummerplade):
 
 	try:
 		# api-endpoint
-		URL_API = config.config["api"]["url"]
+		URL_API = config.config["api"]["url"] + "insurance/plade/"
 		URL_FULL = URL_API + nummerplade
 
 		# sending get request and saving the response as response object

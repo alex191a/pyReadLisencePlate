@@ -36,6 +36,10 @@ class Window(Frame):
 		self.isPolice = Label(self, text="...", font=("Helvetica", 16, "bold"))
 		self.isPolice.place(x=400,y=180, anchor="center")
 
+		# Label to show API status
+		self.apiStatus = Label(self, text="...", font=("Helvetica", 16, "bold"))
+		self.apiStatus.place(x=30,y=580, anchor="w")
+
 
 # Create GUI
 root = Tk()
@@ -44,6 +48,16 @@ root.wm_title("Read license plate")
 root.geometry("800x600")
 # set window background color
 root.configure(bg='lightgray')
+
+def is_api_online():
+
+	apiCheck = api.check_api_status()
+
+	# Check if API is online
+	if apiCheck["success"] == True:
+		app.apiStatus.config(text="API online", fg="green")
+	else:
+		app.apiStatus.config(text="API offline - " + apiCheck["status"], fg="red")
 
 def show_camera():
 
@@ -287,5 +301,9 @@ def checkifLisencePlate(string):
 
 # Show live preview
 show_camera()
+
+# Run API Check
+root.after(1000, lambda: is_api_online())
+
 # Main function
 root.mainloop()
