@@ -71,6 +71,8 @@ def restart_app():
 	# Destroy previously captured image
 	app.imgPanel.destroy()
 	show_camera()
+	app.isPolice.config(text="...")
+	app.licenseText.config(text="...")
 
 def kill_camera():
 	cam.release()
@@ -224,7 +226,7 @@ def readLicensePlate(self):
 			# If error
 			else:
 				print("Error police check")
-				self.isPolice.config(text="Fejl")
+				self.isPolice.config(text="Fejl: " + isPoliceCheck["status"])
 		else:
 			self.isPolice.config(text="...")
 			self.licenseText.config(text="Ingen nummerplade fundet")
