@@ -22,16 +22,16 @@ class Window(Frame):
 		self.configure(background='white', width=800, height=600)
 
 		# Main label
-		Heading = Label(self, text="OpenCV nummerplade læser", font=("Helvetica", 22, "bold"))
-		Heading.place(x=400,y=20, anchor=CENTER)
+		self.Heading = Label(self, text="OpenCV nummerplade læser", font=("Helvetica", 22, "bold"))
+		self.Heading.place(x=400,y=20, anchor=CENTER)
 
 		# Button to read license plate
-		ReadLicensePlateButton = Button(self, text="Start", command=lambda:readLicensePlate(self))
-		ReadLicensePlateButton.place(x=400,y=130, anchor="center")
+		self.ReadLicensePlateButton = Button(self, text="Start", command=lambda:readLicensePlate(self))
+		self.ReadLicensePlateButton.place(x=400,y=130, anchor="center")
 
 		# License plate label
-		licenseText = Label(self, text="...", font=("Helvetica", 16, "bold"))
-		licenseText.place(x=400,y=160, anchor="center")
+		self.licenseText = Label(self, text="...", font=("Helvetica", 16, "bold"))
+		self.licenseText.place(x=400,y=160, anchor="center")
 
         # Is police label
 		self.isPolice = Label(self, text="...", font=("Helvetica", 16, "bold"))
