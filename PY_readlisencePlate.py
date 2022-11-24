@@ -3,8 +3,8 @@ import cv2
 from easyocr import Reader
 import easyocr
 import re
-from cam import Webcam
-from request import IsPolice
+from lib import cam as WebCam
+from lib import api
 from PIL import ImageTk,Image as PILImage, ImageOps
 
 # Tkinter for GUI
@@ -47,18 +47,22 @@ root.configure(bg='lightgray')
 
 def show_camera():
 
+	# Define button
+	app.ReadLicensePlateButton.config(text="Start", command=lambda:readLicensePlate(app))
+
 	# Create a Label to capture the Video frames
 	label = Label(app)
 	label.grid(row=0, column=0)
 	label.place(x=400,y=300, anchor="center")
+	label.size = (300, 200)
 	
 	# Check if cam is open
 	if cam.isOpened() == 0:
 		# Open cam
-		cam.open()
+		cam.open(0)
 
 	# Create label
-	root.LiveCam = label
+	app.LiveCam = label
 
 	# Show frames
 	show_frames()
@@ -69,25 +73,25 @@ def restart_app():
 	show_camera()
 
 def kill_camera():
-	cam.release
-	root.LiveCam.destroy()
+	cam.release()
+	app.LiveCam.destroy()
 
 # Define function to show frame
 def show_frames():
-	if (root.LiveCam.winfo_exists() == 0):
-		cam.release
-		root.LiveCam.destroy()
+	if (app.LiveCam.winfo_exists() == 0):
+		cam.release()
+		app.LiveCam.destroy()
 		return
 	# Get the latest frame and convert into Image
-	cv2image = cv2.cvtColor(cam.read()[1],cv2.COLOR_BGR2RGB)
+	cv2image = cv2.cvtColor(crop_img(cam.read()[1],0.53),cv2.COLOR_BGR2RGB)
 	img = PILImage.fromarray(cv2image).resize((300, 200))
 	# Convert image to PhotoImage
 	imgtk = ImageTk.PhotoImage(image = img)
-	root.LiveCam.imgtk = imgtk
-	root.LiveCam.configure(image=imgtk)
+	app.LiveCam.imgtk = imgtk
+	app.LiveCam.configure(image=imgtk)
 
 	# Repeat after an interval to capture continiously
-	root.LiveCam.after(20, show_frames)
+	app.LiveCam.after(20, show_frames)
 
 # Function for reading license plate
 def readLicensePlate(self):
@@ -109,12 +113,12 @@ def readLicensePlate(self):
 
 	# Load image form filepath
 	#loadedImage = cv2.imread(filepath)
-	loadedImage = Webcam(cam)
+	loadedImage = crop_img(WebCam.Webcam(cam),0.53)
 	originalImage = loadedImage
 
 	# Kill live camera
-	cam.release
-	root.LiveCam.destroy()
+	cam.release()
+	app.LiveCam.destroy()
 
 	# Show image
 	#self.canvas = Canvas(root, width = 300, height = 300)
@@ -126,7 +130,7 @@ def readLicensePlate(self):
 	#img.resize((100, 50), Image.ANTIALIAS)
 	#img.place(x=400,y=400, anchor="center")
 	#self.canvas.create_image(20, 20, anchor="center", image=img)
-	self.imgPanel = Label(root, image=img)
+	self.imgPanel = Label(app, image=img)
 	self.imgPanel.image = img
 	#self.imgPanel.pack(side = "bottom", fill = "both", expand = "yes")
 	#self.imgPanel.place(x=400,y=400, anchor="center")
@@ -199,21 +203,34 @@ def readLicensePlate(self):
 			if len(plate) ==7 and checkifLisencePlate(plate):
 				lisenceplate = plate
 
+	# Check if license plate is police
+	isPoliceCheck = api.IsPolice(lisenceplate)
+
 	# Print license plate if found
 	if lisenceplate != "":
 		if len(lisenceplate):
 			self.licenseText.config(text=lisenceplate)
 			print(lisenceplate)
-			if IsPolice(lisenceplate):
-				print("is police")
-				self.isPolice.config(text="Politi")
+
+			# Update police check	
+			if isPoliceCheck["success"] == True:
+				# Check if car is police owned
+				if isPoliceCheck["IsPolice"] == True:
+					print("is police")
+					self.isPolice.config(text="Politibil")
+				else:
+					print("is not police")
+					self.isPolice.config(text="Ikke politibil")
+			# If error
 			else:
-				print("is not police")
-				self.isPolice.config(text="Ikke politi")
+				print("Error police check")
+				self.isPolice.config(text="Fejl")
 		else:
+			self.isPolice.config(text="...")
 			self.licenseText.config(text="Ingen nummerplade fundet")
 			print("Ingen nummerplade fundet")
 	else:
+		self.isPolice.config(text="...")
 		self.licenseText.config(text="Ingen nummerplade fundet")
 		print("Ingen nummerplade fundet")
 
