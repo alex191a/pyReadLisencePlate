@@ -45,7 +45,7 @@ class Window(Frame):
 # Create GUI
 root = Tk()
 
-app = MainWindow(root)
+app = Window(root)
 root.wm_title("Læs nummerplade med OpenCV")
 # root.geometry("800x600")
 # set window background color
@@ -81,9 +81,9 @@ def show_camera():
 	app.LiveCam = label
 
 	# Show frames
-	show_frames(self)
+	show_frames()
 
-def restart_app(self):
+def restart_app():
 	# Destroy previously captured image
 	app.imgPanel.destroy()
 	show_camera()
