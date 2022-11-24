@@ -3,8 +3,8 @@ import cv2
 from easyocr import Reader
 import easyocr
 import re
-from cam import Webcam
-from request import IsPolice
+from lib import cam as WebCam
+from lib import api
 from PIL import ImageTk,Image as PILImage, ImageOps
 
 # Tkinter for GUI
@@ -83,7 +83,7 @@ def show_frames():
 		app.LiveCam.destroy()
 		return
 	# Get the latest frame and convert into Image
-	cv2image = cv2.cvtColor(cam.read()[1],cv2.COLOR_BGR2RGB)
+	cv2image = cv2.cvtColor(crop_img(cam.read()[1],0.53),cv2.COLOR_BGR2RGB)
 	img = PILImage.fromarray(cv2image).resize((300, 200))
 	# Convert image to PhotoImage
 	imgtk = ImageTk.PhotoImage(image = img)
@@ -113,7 +113,7 @@ def readLicensePlate(self):
 
 	# Load image form filepath
 	#loadedImage = cv2.imread(filepath)
-	loadedImage = Webcam(cam)
+	loadedImage = crop_img(WebCam.Webcam(cam),0.53)
 	originalImage = loadedImage
 
 	# Kill live camera
@@ -203,21 +203,34 @@ def readLicensePlate(self):
 			if len(plate) ==7 and checkifLisencePlate(plate):
 				lisenceplate = plate
 
+	# Check if license plate is police
+	isPoliceCheck = api.IsPolice(lisenceplate)
+
 	# Print license plate if found
 	if lisenceplate != "":
 		if len(lisenceplate):
 			self.licenseText.config(text=lisenceplate)
 			print(lisenceplate)
-			if IsPolice(lisenceplate):
-				print("is police")
-				self.isPolice.config(text="Politi")
+
+			# Update police check	
+			if isPoliceCheck["success"] == True:
+				# Check if car is police owned
+				if isPoliceCheck["IsPolice"] == True:
+					print("is police")
+					self.isPolice.config(text="Politibil")
+				else:
+					print("is not police")
+					self.isPolice.config(text="Ikke politibil")
+			# If error
 			else:
-				print("is not police")
-				self.isPolice.config(text="Ikke politi")
+				print("Error police check")
+				self.isPolice.config(text="Fejl")
 		else:
+			self.isPolice.config(text="...")
 			self.licenseText.config(text="Ingen nummerplade fundet")
 			print("Ingen nummerplade fundet")
 	else:
+		self.isPolice.config(text="...")
 		self.licenseText.config(text="Ingen nummerplade fundet")
 		print("Ingen nummerplade fundet")
 
