@@ -19,6 +19,7 @@ class Window(Frame):
 		Frame.__init__(self, master)
 		self.master = master
 		self.pack(fill=BOTH, expand=1)
+		self.configure(background='white', width=800, height=600)
 
 		# Main label
 		self.Heading = Label(self, text="OpenCV nummerplade læser", font=("Helvetica", 22, "bold"))
@@ -36,14 +37,29 @@ class Window(Frame):
 		self.isPolice = Label(self, text="...", font=("Helvetica", 16, "bold"))
 		self.isPolice.place(x=400,y=180, anchor="center")
 
+		# Label to show API status
+		self.apiStatus = Label(self, text="...", font=("Helvetica", 16, "bold"))
+		self.apiStatus.place(x=30,y=580, anchor="w")
+
 
 # Create GUI
 root = Tk()
+
 app = Window(root)
-root.wm_title("Read license plate")
-root.geometry("800x600")
+root.wm_title("Læs nummerplade med OpenCV")
+# root.geometry("800x600")
 # set window background color
 root.configure(bg='lightgray')
+
+def is_api_online():
+
+	apiCheck = api.check_api_status()
+
+	# Check if API is online
+	if apiCheck["success"] == True:
+		app.apiStatus.config(text="API online", fg="green")
+	else:
+		app.apiStatus.config(text="API offline - " + apiCheck["status"], fg="red")
 
 def show_camera():
 
@@ -71,6 +87,8 @@ def restart_app():
 	# Destroy previously captured image
 	app.imgPanel.destroy()
 	show_camera()
+	app.isPolice.config(text="...")
+	app.licenseText.config(text="...")
 
 def kill_camera():
 	cam.release()
@@ -95,7 +113,6 @@ def show_frames():
 
 # Function for reading license plate
 def readLicensePlate(self):
-	lisenceplate= ""
 
 	# Update status
 	self.licenseText.config(text="Læser nummerplade...")
@@ -224,7 +241,7 @@ def readLicensePlate(self):
 			# If error
 			else:
 				print("Error police check")
-				self.isPolice.config(text="Fejl")
+				self.isPolice.config(text="Fejl: " + isPoliceCheck["status"])
 		else:
 			self.isPolice.config(text="...")
 			self.licenseText.config(text="Ingen nummerplade fundet")
@@ -237,7 +254,7 @@ def readLicensePlate(self):
 
 
 	# Update start button to restart application
-	self.ReadLicensePlateButton.config(text="Restart", command=lambda:restart_app())
+	self.ReadLicensePlateButton.config(text="Genstart", command=lambda:restart_app(), state=NORMAL)
 	self.ReadLicensePlateButton.update()
 
 # Regex
@@ -285,5 +302,9 @@ def checkifLisencePlate(string):
 
 # Show live preview
 show_camera()
+
+# Run API Check
+root.after(1000, lambda: is_api_online())
+
 # Main function
 root.mainloop()
