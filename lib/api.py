@@ -14,17 +14,19 @@ def check_api_status():
 
 	try:
 		# api-endpoint
-		URL_API = config.config["api"]["url"] + "/ping"
+		URL_API = config.config["api"]["url"] + "ping"
 
 		# sending get request and saving the response as response object
 		response = requests.get(url = URL_API, verify=False)
-		resp_dict = response.json()
 
-		# Check if success
 		# Check status code
 		if response.status_code != 200:
 			returnObject["success"] = False
+			returnObject["status"] =  f"{response.status_code} - {response.reason}"
 			return returnObject
+
+		# Decode response		
+		resp_dict = response.json()
 
 		# Update return object
 		returnObject["success"] = resp_dict.get('success') or False
