@@ -259,7 +259,7 @@ def readLicensePlate(self):
 
 
 	# Update start button to restart application
-	self.ReadLicensePlateButton.configure(text="Genstart", command=lambda:restart_app(), state=tk.CTkNORMAL)
+	self.ReadLicensePlateButton.configure(text="Genstart", command=lambda:restart_app(), state="normal")
 	self.ReadLicensePlateButton.update()
 
 # Regex
