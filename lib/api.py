@@ -73,7 +73,7 @@ def IsPolice(nummerplade):
 		URL_FULL = URL_API + nummerplade
 
 		# sending get request and saving the response as response object
-		response = requests.post(url = URL_FULL, verify=False, json={ "location": "Arhus", "email": "jona674j@edu.mercantec.dk" })
+		response = requests.post(url = URL_FULL, verify=False, json={ "locationX": "Arhus", "email": "jona674j@edu.mercantec.dk" })
 		resp_dict = response.json()
 
 		# Check if success
