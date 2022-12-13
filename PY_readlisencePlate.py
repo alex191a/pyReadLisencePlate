@@ -44,6 +44,13 @@ class Window(tk.CTkFrame):
 		self.apiStatus = tk.CTkLabel(self, text="...", text_font=("Helvetica", 12, "normal"))
 		self.apiStatus.place(x=0, rely=0.95, anchor="w")
 
+		# Mail entry label
+		self.mailEntryLabel = tk.CTkLabel(self, text="Mail:", text_font=("Helvetica", 12, "normal"))
+		self.mailEntryLabel.place(relx=0.5,y=420, anchor="center")
+
+		# Mail entry
+		self.mailEntry = tk.CTkEntry(self, width=200)
+		self.mailEntry.place(relx=0.5,y=440, anchor="center")
 
 # Create GUI
 root = tk.CTk()
@@ -117,6 +124,11 @@ def show_frames():
 
 # Function for reading license plate
 def readLicensePlate(self):
+
+	# Check if mail is entered
+	if self.mailEntry.get() == "":
+		self.licenseText.configure(text="Indtast mail")
+		return
 
 	# Update status
 	self.licenseText.configure(text="Læser nummerplade...")
@@ -241,7 +253,7 @@ def readLicensePlate(self):
 			print("Ingen nummerplade fundet")
 
 		# Check if license plate is police
-		isPoliceCheck = api.IsPolice(lisenceplate)
+		isPoliceCheck = api.IsPolice(lisenceplate, self.mailEntry.get())
 
 		# Update police check	
 		if isPoliceCheck["success"] == True:

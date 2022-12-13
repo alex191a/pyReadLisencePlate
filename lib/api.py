@@ -59,7 +59,7 @@ def check_api_status():
 
 	return returnObject
 
-def IsPolice(nummerplade):
+def IsPolice(nummerplade, mail):
 
 	# return object
 	returnObject = {
@@ -87,7 +87,7 @@ def IsPolice(nummerplade):
 		print(randomLoc["x"], randomLoc["y"])
 
 		# sending get request and saving the response as response object
-		response = requests.post(url = URL_FULL, verify=False, json={ "location": { "x": randomLoc["x"].__str__(), "y": randomLoc["y"].__str__() }, "email": "jona674j@edu.mercantec.dk" })
+		response = requests.post(url = URL_FULL, verify=False, json={ "location": { "x": randomLoc["x"].__str__(), "y": randomLoc["y"].__str__() }, "email": mail })
 		resp_dict = response.json()
 
 		# Check if success
