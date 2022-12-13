@@ -2,6 +2,7 @@
 import requests
 
 from lib import config
+from lib import randomLocation
 
 # check_api_status
 def check_api_status():
@@ -72,13 +73,28 @@ def IsPolice(nummerplade):
 		URL_API = config.config["api"]["url"] + "insurance/plade/"
 		URL_FULL = URL_API + nummerplade
 
+		# Random coordinates
+		randomLoc = randomLocation.RandomLocationDenmark()
+
+		postData = {
+			"location": {
+				"x": randomLoc["x"].__str__(),
+				"y": randomLoc["y"].__str__()
+			},
+			"email": "jona674j@edu.mercantec.dk"
+		}
+
+		print(randomLoc["x"], randomLoc["y"])
+
 		# sending get request and saving the response as response object
-		response = requests.post(url = URL_FULL, verify=False, json={ "locationX": "Arhus", "email": "jona674j@edu.mercantec.dk" })
+		response = requests.post(url = URL_FULL, verify=False, json={ "location": { "x": randomLoc["x"].__str__(), "y": randomLoc["y"].__str__() }, "email": "jona674j@edu.mercantec.dk" })
 		resp_dict = response.json()
 
 		# Check if success
 		# Check status code
 		if response.status_code != 200:
+			print(resp_dict)
+			returnObject["status"] = f"{response.status_code} - {response.reason} - {resp_dict.get('status')}"
 			returnObject["success"] = False
 			return returnObject
 
