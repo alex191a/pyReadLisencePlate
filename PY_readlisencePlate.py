@@ -73,7 +73,7 @@ def is_api_online():
 	if apiCheck["success"] == True:
 		app.apiStatus.configure(text="Online", fg="#778899")
 	else:
-		app.apiStatus.configure(text="Offline - " + apiCheck["status"], fg="#f08080")
+		app.apiStatus.configure(text="Offline" if debug == False else f"Offline - {apiCheck['status']}", fg="#f08080")
 
 def show_camera():
 
