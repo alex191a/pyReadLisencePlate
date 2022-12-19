@@ -16,6 +16,9 @@ import customtkinter as tk
 # Global variable for cam
 cam = cv2.VideoCapture(0)
 
+# Boolean debug mode
+debug = False
+
 # Variable for license plate text
 class Window(tk.CTkFrame):
 	def __init__(self, master=None):
@@ -57,7 +60,7 @@ root = tk.CTk()
 root.resizable(False, False)
 
 app = Window(root)
-root.wm_title("Læs nummerplade med OpenCV")
+root.wm_title("Læs nummerplade med OpenCV" if debug == False else "DEBUG - Læs nummerplade med OpenCV")
 # root.geometry("800x600")
 # set window background color
 root.configure(bg='lightgray')
@@ -198,10 +201,15 @@ def readLicensePlate(self):
 	# Create edged image
 	edged = cv2.Canny(blur, 30, 200) 
 
-	# Open images in a new window
-	""" cv2.imshow("testImage",loadedImage)
-	cv2.imshow("TestImage2",edged)
-	cv2.imshow("tester", greyImg) """
+	# Open images in a new window if debug mode is enabled
+	if debug == True:
+		cv2.imshow("Step 1: Resize",resizedImage)
+		cv2.imshow("Step 2: Blue image",blueImage)
+		cv2.imshow("Step 3: BackToBack",backtoback)
+		cv2.imshow("Step 4: Greyscale", greyImg)
+		cv2.imshow("Step 5: Threshold", Image)
+		cv2.imshow("Step 6: Edged",edged)
+
 
 	# Initialize reader
 	reader = Reader(['en'])
